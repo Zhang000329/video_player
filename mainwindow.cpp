@@ -69,7 +69,9 @@ void MainWindow::onPlayerStateChanged(VideoPlayer* player)
 
         ui->durationLabel->setText("00:00:00");
         ui->currentlSlider->setValue(0);
-        ui->volumnSlider->setValue(ui->volumnSlider->maximum());
+
+
+        ui->playWidget->setCurrentWidget(ui->openFilePage);
     }
     else {
         ui->playBtn->setEnabled(true);
@@ -77,6 +79,8 @@ void MainWindow::onPlayerStateChanged(VideoPlayer* player)
         ui->currentlSlider->setEnabled(true);
         ui->volumnSlider->setEnabled(true);
         ui->silenceBtn->setEnabled(true);
+
+        ui->playWidget->setCurrentWidget(ui->videoPage);
     }
 };
 void MainWindow::on_currentlSlider_valueChanged(int value)

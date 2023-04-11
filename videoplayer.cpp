@@ -1,5 +1,7 @@
 #include "videoplayer.h"
-
+#include <QDebug>
+#include <QThread>
+#include <thread>
 VideoPlayer::VideoPlayer(QObject* parent)
     : QObject(parent)
 {}
@@ -10,6 +12,12 @@ void VideoPlayer::play()
     if (_state == Playing) {
         return;
     }
+
+
+    // 开启线程读取文件
+    std::thread([this]() { readFile(); }).detach();
+
+
     setState(Playing);
 }
 
@@ -50,4 +58,12 @@ void VideoPlayer::setFilename(const char* filename)
 VideoPlayer::State VideoPlayer::getState()
 {
     return _state;
+}
+
+void VideoPlayer::readFile() {}
+
+int VideoPlayer::initVideoInfo() {}
+int VideoPlayer::initAudioInfo() {}
+int VideoPlayer::initDecoder(AVCodecContext** decodeCtx, AVStream** stream, AVMediaType type) {
+
 }

@@ -16,11 +16,11 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QStackedWidget" name="stackedWidget">
+     <widget class="QStackedWidget" name="playWidget">
       <property name="currentIndex">
        <number>0</number>
       </property>
-      <widget class="QWidget" name="page">
+      <widget class="QWidget" name="openFilePage">
        <layout class="QHBoxLayout" name="horizontalLayout_5">
         <item>
          <widget class="QPushButton" name="openFileBtn">
@@ -37,7 +37,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="page_2">
+      <widget class="QWidget" name="videoPage">
        <layout class="QHBoxLayout" name="horizontalLayout_6">
         <item>
          <widget class="VideoWidget" name="videoWidget" native="true"/>
@@ -68,7 +68,7 @@
              <bool>false</bool>
             </property>
             <property name="text">
-             <string>暂停</string>
+             <string>停止</string>
             </property>
            </widget>
           </item>
