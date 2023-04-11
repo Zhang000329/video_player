@@ -8,6 +8,8 @@ extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libavutil/avutil.h>
+#include <libswresample/swresample.h>
+#include <libswscale/swscale.h>
 }
 
 #define ERROR_BUF      \
@@ -73,25 +75,112 @@ public:
     State getState();
     /** 设置文件名称*/
     void setFilename(const char* filename);
-
+    /** 获取总时长（单位是秒）*/
+    int getDuration();
+    /** 当前的播放时刻 */
+    int getTime();
+    /** 设置当前的播放时刻*/
+    void setTime(int seekTime);
+    /** 设置音量*/
+    void setVolumn(int volumn);
+    /** 获取音量*/
+    int getVolumn();
+    /** 设置静音*/
+    void setMute(bool mute);
+    /** 判断是否静音 */
+    bool isMute();
 
 signals:
-    void stateChanged(VideoPlayer* videoplayer);
+    void stateChanged(VideoPlayer* player);
+    void timeChanged(VideoPlayer* player);
+    void initFinished(VideoPlayer* player);
+    void playFailed(VideoPlayer* player);
+    void frameDecoded(VideoPlayer* player, uint8_t* data, VideoSwsSpec& spec);
 
 private:
-    State       _state = Stopped;
-    void        setState(State state);
-    const char* _filename;
-    void        readFile();
-    /** 解封装需要的参数*/
-    AVFormatContext* _fmtCtx     = nullptr;
-    AVCodecContext * _aDecodeCtx = nullptr, *_vDecodeCtx = nullptr;
-    AVStream *       _aStream = nullptr, *_vStream = nullptr;
-    AVFrame *        _aFrame = nullptr, *_vFrame = nullptr;
+    /******** 音频相关 ********/
+    typedef struct
+    {
+        int            sampleRate;
+        AVSampleFormat sampleFmt;
+        int            chnLayout;
+        int            chs;
+        int            bytesPerSampleFrame;
+    } AudioSwrSpec;
 
-    int initVideoInfo();
+    /** 解封装需要的参数*/
+
+    /** 解码上下文 */
+    AVCodecContext* _aDecodeCtx = nullptr;
+    /** 流 */
+    AVStream* _aStream = nullptr;
+    /** 存放音频包的列表 */
+    std::list<AVPacket> _aPktList;
+    /** 音频包列表的锁 */
+    CondMutex _aMutex;
+    /** 音频重采样上下文 */
+    SwrContext* _aSwrCtx = nullptr;
+    /** 音频重采样输入\输出参数 */
+    AudioSwrSpec _aSwrInSpec, _aSwrOutSpec;
+    /** 音频重采样输入\输出frame */
+    AVFrame *_aSwrInFrame = nullptr, *_aSwrOutFrame = nullptr;
+    /** 音频重采样输出PCM的索引 */
+    int _aSwrOutIdx = 0;
+    /** 音频重采样输出PCM的大小 */
+    int _aSwrOutSize = 0;
+    /** 音频时钟，当前音频包对应的时间值 */
+    double _aTime = 0;
+    /** 音频资源是否可以释放 */
+    bool _aCanFreee = false;
+    /** 外面设置的当前的播放时刻 */
+    int _aSeekTime = -1;
+    /** 是否有音频流 */
+    bool _hasAudio = false;
+
+    /** 初始化音频信息 */
     int initAudioInfo();
+    /** 初始化音频重采样 */
+    int initSwr();
+    /** 初始化SDL */
+    int initSDL();
+    /** 添加数据包到音频包列表中 */
+    void addAudioPkt(AVPacket& pkt);
+    /** 清空音频包列表 */
+    void clearAudioPktList();
+    /** SDL填充缓冲区的回调函数 */
+    static void sdlAudioCallbackFunc(void* userdata, Uint8* stream, int len);
+    /** SDL填充缓冲区的回调函数 */
+    void sdlAudioCallback(Uint8* stream, int len);
+    /** 音频解码 */
+    int decodeAudio();
+
+    /** 其他 */
+    /** 解封装上下文 */
+    AVFormatContext* _fmtCtx = nullptr;
+    /** 是否可以释放fmtCtx */
+    bool _fmtCtxCanFree = false;
+    /** 音量 */
+    int _volumn = Max;
+    /** 静音 */
+    bool _mute = false;
+    /** 当前状态 */
+    State _state = Stopped;
+    /** 文件名 */
+    char _filename[512];
+    /** 外部设置的当前的播放时刻 */
+    int _seekTime = -1;
+    /** 初始化解码器和解码上下文 */
     int initDecoder(AVCodecContext** decodeCtx, AVStream** stream, AVMediaType type);
+    /** 设置状态 */
+    void setState(State state);
+    /** 读取文件数据 */
+    void readFile();
+    /** 释放资源 */
+    void free();
+    void freeAudio();
+    void freeVideo();
+    /** 严重错误 */
+    void fataError();
 };
 
 #endif   // VIDEOPLAYER_H

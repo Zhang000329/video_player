@@ -35,7 +35,9 @@ INCLUDEPATH += /usr/local/ffmpeg/include
 LIBS += -L/usr/local/ffmpeg/lib \
         -lavcodec \
         -lavformat \
-        -lavutil
+        -lavutil \
+        -lswresample \
+        -lswscale
 
 INCLUDEPATH += /opt/homebrew/Cellar/sdl2/2.26.4/include
 LIBS += -L /opt/homebrew/Cellar/sdl2/2.26.4/lib \
