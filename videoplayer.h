@@ -74,7 +74,7 @@ public:
     /** 获取当前状态*/
     State getState();
     /** 设置文件名称*/
-    void setFilename(const char* filename);
+    void setFilename(QString& filename);
     /** 获取总时长（单位是秒）*/
     int getDuration();
     /** 当前的播放时刻 */
@@ -131,7 +131,7 @@ private:
     /** 音频时钟，当前音频包对应的时间值 */
     double _aTime = 0;
     /** 音频资源是否可以释放 */
-    bool _aCanFreee = false;
+    bool _aCanFree = false;
     /** 外面设置的当前的播放时刻 */
     int _aSeekTime = -1;
     /** 是否有音频流 */

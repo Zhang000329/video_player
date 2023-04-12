@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include "videoplayer.h"
+#include "videoslider.h"
 #include <QMainWindow>
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -30,8 +31,19 @@ private slots:
 
     void onPlayerStateChanged(VideoPlayer* player);
 
+    void onPlayerPlayFailed(VideoPlayer* player);
+
+    void onPlayerTimeChanged(VideoPlayer* player);
+
+    void onPlayerInitFinished(VideoPlayer* player);
+
+    void onSliderClicked(VideoSlider* slider);
+
+
+
 private:
     Ui::MainWindow* ui;
     VideoPlayer*    _player;
+    QString         getTimeText(int value);
 };
 #endif   // MAINWINDOW_H

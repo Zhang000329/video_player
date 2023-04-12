@@ -2,20 +2,38 @@
 #include "ui_mainwindow.h"
 #include <QDebug>
 #include <QFileDialog>
+#include <QMessageBox>
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    qRegisterMetaType<VideoPlayer::VideoSwsSpec>("VideoSwsSpec&");
     _player = new VideoPlayer();
     connect(_player, &VideoPlayer::stateChanged, this, &MainWindow::onPlayerStateChanged);
+    connect(_player, &VideoPlayer::playFailed, this, &MainWindow::onPlayerPlayFailed);
+    connect(_player, &VideoPlayer::timeChanged, this, &MainWindow::onPlayerTimeChanged);
+    connect(_player, &VideoPlayer::initFinished, this, &MainWindow::onPlayerInitFinished);
+
+    // 监听时间滑块的点击
+    connect(ui->currentlSlider, &VideoSlider::clicked, this, &MainWindow::onSliderClicked);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+    delete _player;
 }
 
+void MainWindow::onPlayerPlayFailed(VideoPlayer* player)
+{
+    QMessageBox::critical(nullptr, "提示", "播放失败");
+}
+
+void MainWindow::onSliderClicked(VideoSlider* slider)
+{
+    _player->setTime(slider->value());
+}
 
 void MainWindow::on_playBtn_clicked()
 {
@@ -47,7 +65,7 @@ void MainWindow::on_openFileBtn_clicked()
     if (filename.isEmpty()) return;
 
     qDebug() << filename;
-    _player->setFilename(filename.toUtf8().data());
+    _player->setFilename(filename);
     _player->play();
 }
 void MainWindow::onPlayerStateChanged(VideoPlayer* player)
@@ -94,4 +112,30 @@ void MainWindow::on_volumnSlider_valueChanged(int value)
 {
     ui->volumnLabel->setText(QString("%1").arg(value));
     qDebug() << "on_volumnSlider_valueChanged" << value;
+}
+
+
+void MainWindow::onPlayerInitFinished(VideoPlayer* player)
+{
+    int duration = player->getDuration();
+
+    // 设置slider的范围
+    ui->currentlSlider->setRange(0, duration);
+
+    // 设置label的文字
+    ui->durationLabel->setText(getTimeText(duration));
+}
+
+void MainWindow::onPlayerTimeChanged(VideoPlayer* player)
+{
+    ui->currentlSlider->setValue(player->getTime());
+}
+
+QString MainWindow::getTimeText(int value)
+{
+    QLatin1Char fill = QLatin1Char('0');
+    return QString("%1:%2:%3")
+        .arg(value / 3600, 2, 10, fill)
+        .arg((value / 60) % 60, 2, 10, fill)
+        .arg(value % 60, 2, 10, fill);
 }
