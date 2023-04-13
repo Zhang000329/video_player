@@ -9,7 +9,7 @@
 
 ### 遇到的问题
 
-1.使用mac，当使用**`QFileDialog::getOpenFileName`**出现闪退的情况时，解决方法如下
+1.使用mac，当使用"`QFileDialog::getOpenFileName`"出现闪退的情况时，解决方法如下
 
 ```c++
 QString filename =
