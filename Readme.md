@@ -30,7 +30,7 @@ QString filename =
 
 重采样：将音频A转换成音频B，并且音频A、B的参数（采样率、采样格式、声道数）并不完全相同。其主要用于音视频的解码和压缩。
 
-![image-20230413112615878](/Users/zhangyujun/Library/Application Support/typora-user-images/image-20230413112615878.png)
+![image-20230413112615878](./pic/resample.jpg)
 
 1.获取输入输出格式
 
