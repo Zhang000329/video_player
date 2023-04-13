@@ -32,7 +32,7 @@ void MainWindow::onPlayerPlayFailed(VideoPlayer* player)
 
 void MainWindow::onSliderClicked(VideoSlider* slider)
 {
-    _player->setTime(slider->value());
+    //_player->setTime(slider->value());
 }
 
 void MainWindow::on_playBtn_clicked()
@@ -117,18 +117,18 @@ void MainWindow::on_volumnSlider_valueChanged(int value)
 
 void MainWindow::onPlayerInitFinished(VideoPlayer* player)
 {
-    int duration = player->getDuration();
+    //    int duration = player->getDuration();
 
-    // 设置slider的范围
-    ui->currentlSlider->setRange(0, duration);
+    //    // 设置slider的范围
+    //    ui->currentlSlider->setRange(0, duration);
 
-    // 设置label的文字
-    ui->durationLabel->setText(getTimeText(duration));
+    //    // 设置label的文字
+    //    ui->durationLabel->setText(getTimeText(duration));
 }
 
 void MainWindow::onPlayerTimeChanged(VideoPlayer* player)
 {
-    ui->currentlSlider->setValue(player->getTime());
+    // ui->currentlSlider->setValue(player->getTime());
 }
 
 QString MainWindow::getTimeText(int value)

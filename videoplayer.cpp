@@ -75,7 +75,10 @@ void VideoPlayer::setState(State state)
 
 void VideoPlayer::setFilename(QString& filename)
 {
-    const char* name = filename.toStdString().c_str();
+    std::string tmp = filename.toStdString();
+
+    const char* name = tmp.c_str();
+    qDebug() << name;
     memcpy(_filename, name, strlen(name) + 1);
 }
 
@@ -83,7 +86,8 @@ void VideoPlayer::setFilename(QString& filename)
 void VideoPlayer::readFile()
 {
     int ret = 0;
-    ret     = avformat_open_input(&_fmtCtx, _filename, nullptr, nullptr);
+    qDebug() << _filename;
+    ret = avformat_open_input(&_fmtCtx, _filename, nullptr, nullptr);
     END(avformat_open_input);
 
     ret = avformat_find_stream_info(_fmtCtx, nullptr);
