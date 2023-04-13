@@ -41,6 +41,8 @@ private slots:
 
 
 
+    void on_muteBtn_clicked();
+
 private:
     Ui::MainWindow* ui;
     VideoPlayer*    _player;

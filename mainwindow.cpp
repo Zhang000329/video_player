@@ -9,14 +9,24 @@ MainWindow::MainWindow(QWidget* parent)
 {
     ui->setupUi(this);
     qRegisterMetaType<VideoPlayer::VideoSwsSpec>("VideoSwsSpec&");
+    // 创建播放器
     _player = new VideoPlayer();
     connect(_player, &VideoPlayer::stateChanged, this, &MainWindow::onPlayerStateChanged);
-    connect(_player, &VideoPlayer::playFailed, this, &MainWindow::onPlayerPlayFailed);
     connect(_player, &VideoPlayer::timeChanged, this, &MainWindow::onPlayerTimeChanged);
     connect(_player, &VideoPlayer::initFinished, this, &MainWindow::onPlayerInitFinished);
+    connect(_player, &VideoPlayer::playFailed, this, &MainWindow::onPlayerPlayFailed);
+
+    connect(
+        _player, &VideoPlayer::frameDecoded, ui->videoWidget, &VideoWidget::onPlayerFrameDecoded);
+    connect(
+        _player, &VideoPlayer::stateChanged, ui->videoWidget, &VideoWidget::onPlayerStateChanged);
 
     // 监听时间滑块的点击
     connect(ui->currentlSlider, &VideoSlider::clicked, this, &MainWindow::onSliderClicked);
+
+    // 设置音量滑块的范围
+    ui->volumnSlider->setRange(VideoPlayer::Volumn::Min, VideoPlayer::Volumn::Max);
+    ui->volumnSlider->setValue(ui->volumnSlider->maximum() >> 3);
 }
 
 MainWindow::~MainWindow()
@@ -32,7 +42,7 @@ void MainWindow::onPlayerPlayFailed(VideoPlayer* player)
 
 void MainWindow::onSliderClicked(VideoSlider* slider)
 {
-    //_player->setTime(slider->value());
+    _player->setTime(slider->value());
 }
 
 void MainWindow::on_playBtn_clicked()
@@ -83,12 +93,12 @@ void MainWindow::onPlayerStateChanged(VideoPlayer* player)
         ui->stopBtn->setEnabled(false);
         ui->currentlSlider->setEnabled(false);
         ui->volumnSlider->setEnabled(false);
-        ui->silenceBtn->setEnabled(false);
+        ui->muteBtn->setEnabled(false);
 
-        ui->durationLabel->setText("00:00:00");
+        ui->durationLabel->setText(getTimeText(0));
         ui->currentlSlider->setValue(0);
 
-
+        // 显示打开文件的页面
         ui->playWidget->setCurrentWidget(ui->openFilePage);
     }
     else {
@@ -96,8 +106,9 @@ void MainWindow::onPlayerStateChanged(VideoPlayer* player)
         ui->stopBtn->setEnabled(true);
         ui->currentlSlider->setEnabled(true);
         ui->volumnSlider->setEnabled(true);
-        ui->silenceBtn->setEnabled(true);
+        ui->muteBtn->setEnabled(true);
 
+        // 显示播放视频的页面
         ui->playWidget->setCurrentWidget(ui->videoPage);
     }
 };
@@ -105,30 +116,32 @@ void MainWindow::on_currentlSlider_valueChanged(int value)
 {
 
     qDebug() << "on_currentlSlider_valueChanged" << value;
+    ui->currentLabel->setText(getTimeText(value));
 }
 
 
 void MainWindow::on_volumnSlider_valueChanged(int value)
 {
     ui->volumnLabel->setText(QString("%1").arg(value));
+    _player->setVolumn(value);
     qDebug() << "on_volumnSlider_valueChanged" << value;
 }
 
 
 void MainWindow::onPlayerInitFinished(VideoPlayer* player)
 {
-    //    int duration = player->getDuration();
+    int duration = player->getDuration();
 
-    //    // 设置slider的范围
-    //    ui->currentlSlider->setRange(0, duration);
+    // 设置slider的范围
+    ui->currentlSlider->setRange(0, duration);
 
-    //    // 设置label的文字
-    //    ui->durationLabel->setText(getTimeText(duration));
+    // 设置label的文字
+    ui->durationLabel->setText(getTimeText(duration));
 }
 
 void MainWindow::onPlayerTimeChanged(VideoPlayer* player)
 {
-    // ui->currentlSlider->setValue(player->getTime());
+    ui->currentlSlider->setValue(player->getTime());
 }
 
 QString MainWindow::getTimeText(int value)
@@ -138,4 +151,15 @@ QString MainWindow::getTimeText(int value)
         .arg(value / 3600, 2, 10, fill)
         .arg((value / 60) % 60, 2, 10, fill)
         .arg(value % 60, 2, 10, fill);
+}
+void MainWindow::on_muteBtn_clicked()
+{
+    if (_player->isMute()) {
+        _player->setMute(false);
+        ui->muteBtn->setText("静音");
+    }
+    else {
+        _player->setMute(true);
+        ui->muteBtn->setText("开音");
+    }
 }

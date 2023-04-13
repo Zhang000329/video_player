@@ -154,6 +154,41 @@ private:
     /** 音频解码 */
     int decodeAudio();
 
+    /******** 视频相关 ********/
+    /******** 视频相关 ********/
+    /** 解码上下文 */
+    AVCodecContext* _vDecodeCtx = nullptr;
+    /** 流 */
+    AVStream* _vStream = nullptr;
+    /** 像素格式转换的输入\输出frame */
+    AVFrame *_vSwsInFrame = nullptr, *_vSwsOutFrame = nullptr;
+    /** 像素格式转换的上下文 */
+    SwsContext* _vSwsCtx = nullptr;
+    /** 像素格式转换的输出frame的参数 */
+    VideoSwsSpec _vSwsOutSpec;
+    /** 存放视频包的列表 */
+    std::list<AVPacket> _vPktList;
+    /** 视频包列表的锁 */
+    CondMutex _vMutex;
+    /** 视频时钟，当前视频包对应的时间值 */
+    double _vTime = 0;
+    /** 视频资源是否可以释放 */
+    bool _vCanFree = false;
+    /** 外面设置的当前播放时刻（用于完成seek功能） */
+    int _vSeekTime = -1;
+    /** 是否有视频流 */
+    bool _hasVideo = false;
+
+    /** 初始化视频信息 */
+    int initVideoInfo();
+    /** 初始化视频像素格式转换 */
+    int initSws();
+    /** 添加数据包到视频包列表中 */
+    void addVideoPkt(AVPacket& pkt);
+    /** 清空视频包列表 */
+    void clearVideoPktList();
+    /** 解码视频 */
+    void decodeVideo();
     /** 其他 */
     /** 解封装上下文 */
     AVFormatContext* _fmtCtx = nullptr;
